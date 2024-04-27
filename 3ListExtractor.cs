@@ -1,0 +1,136 @@
+using HtmlAgilityPack;
+using System;
+using System.Net;
+using System.Text.RegularExpressions;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Prompt the user to enter the URL
+        Console.WriteLine("Enter the URL:");
+        string url = Console.ReadLine();
+
+        // Load HTML content from the specified URL
+        string htmlContent = LoadHtmlFromUrl(url);
+
+        if (!string.IsNullOrEmpty(htmlContent))
+        {
+            // Load the HTML document
+            HtmlDocument htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlContent);
+
+            // Remove script elements
+            foreach (var scriptNode in htmlDocument.DocumentNode.Descendants("script").ToArray())
+            {
+                scriptNode.Remove();
+            }
+
+            // Remove style elements
+            foreach (var styleNode in htmlDocument.DocumentNode.Descendants("style").ToArray())
+            {
+                styleNode.Remove();
+            }
+
+            // Remove hyperlink elements
+            foreach (var aNode in htmlDocument.DocumentNode.Descendants("a").ToArray())
+            {
+                aNode.Remove();
+            }
+
+            // Remove navbar if it has specific class name or id
+            var navbars = htmlDocument.DocumentNode.SelectNodes("//*[@class='navbar'] | //*[@id='navbar']");
+            if (navbars != null)
+            {
+                foreach (var navbar in navbars)
+                {
+                    navbar.Remove();
+                }
+            }
+
+            // Clean HTML content without spaces and newlines
+            string cleanedHtml = RemoveSpacesAndNewlines(htmlDocument.DocumentNode.InnerText);
+
+            // Select the table element
+            HtmlNode tableNode = htmlDocument.DocumentNode.SelectSingleNode("//table");
+
+            if (tableNode != null)
+            {
+                // Extract table content without spaces and newlines
+                string tableContent = RemoveSpacesAndNewlines(tableNode.InnerText);
+                Console.WriteLine("Table Content:");
+                Console.WriteLine(tableContent);
+            }
+            else
+            {
+                Console.WriteLine("No table found in the HTML content.");
+            }
+
+            // Select list item elements
+            var listItems = htmlDocument.DocumentNode.SelectNodes("//li");
+
+            if (listItems != null && listItems.Count > 0)
+            {
+                // Extract list item content without spaces and newlines
+                Console.WriteLine("\nList Item Content:");
+                foreach (var listItem in listItems)
+                {
+                    string listItemContent = RemoveSpacesAndNewlines(listItem.InnerText);
+                    Console.WriteLine(listItemContent);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No list items found in the HTML content.");
+            }
+
+            // Select and extract text content from div elements
+            var divContents = htmlDocument.DocumentNode.SelectNodes("//div");
+
+            if (divContents != null && divContents.Count > 0)
+            {
+                // Extract content from div elements without spaces and newlines
+                Console.WriteLine("\nDiv Content:");
+                foreach (var divContent in divContents)
+                {
+                    string divContentText = RemoveSpacesAndNewlines(divContent.InnerText);
+                    Console.WriteLine(divContentText);
+                }
+            }
+            else
+            {
+                Console.WriteLine("No div elements found in the HTML content.");
+            }
+
+            // Output the cleaned HTML content without spaces and newlines
+            Console.WriteLine("\nCleaned Text Content:");
+            Console.WriteLine(cleanedHtml);
+        }
+        else
+        {
+            Console.WriteLine("Failed to load HTML content from the specified URL.");
+        }
+    }
+
+    static string LoadHtmlFromUrl(string url)
+    {
+        try
+        {
+            using (WebClient client = new WebClient())
+            {
+                return client.DownloadString(url);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading HTML content from URL: {ex.Message}");
+            return null;
+        }
+    }
+
+    static string RemoveSpacesAndNewlines(string input)
+    {
+        // Remove spaces and newlines
+        return Regex.Replace(input, @"\s+", "");
+    }
+}
