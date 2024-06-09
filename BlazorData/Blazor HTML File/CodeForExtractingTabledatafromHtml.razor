@@ -1,0 +1,49 @@
+@page "/"
+
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<h3>Table Data</h3>
+<table>
+    <tr>
+        <th>Company</th>
+        <th>Country</th>
+    </tr>
+    <tr>
+        <td>Alfreds Futterkiste</td>
+        <td>Germany</td>
+    </tr>
+    <tr>
+        <td>Centro comercial Moctezuma</td>
+        <td>Mexico</td>
+    </tr>
+    <tr>
+        <td>Ernst Handel</td>
+        <td>Austria</td>
+    </tr>
+    <tr>
+        <td>Island Trading</td>
+        <td>UK</td>
+    </tr>
+    <tr>
+        <td>Laughing Bacchus Winecellars</td>
+        <td>Canada</td>
+    </tr>
+    <tr>
+        <td>Magazzini Alimentari Riuniti</td>
+        <td>Italy</td>
+    </tr>
+</table>
+
+<button @onclick="ExtractTableData">Extract Data</button>
+
+<p>@jsonData</p>
+
+@code {
+    private string jsonData;
+
+    private async Task ExtractTableData()
+    {
+        jsonData = await JSRuntime.InvokeAsync<string>("extractTableData");
+    }
+}
